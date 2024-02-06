@@ -8,27 +8,16 @@ const int ledPin = 13;
 
 int counter = 0; // 计数器
 bool is_interrupted = false; // 是否中断
-bool is_get_new_interrupted_time = false; // 是否获取新的时间
 unsigned long previousMicros = 0; // 用于保存上一次事件发生的时间
 unsigned long currentMicros = 0; // 用于保存当前事件发生的时间
-unsigned long interrupted_time = 0; // 用于保存中断时长
+unsigned long InterruptedTime = 0; // 用于保存中断时长
 
 void setup() {
-  Serial.begin(9600); // 初始化串口
   pinMode(sensorPin, INPUT_PULLUP); // 使用内部上拉电阻
   pinMode(ledPin, OUTPUT);
   lcd.init(); // 初始化LCD
   lcd.backlight(); // 打开背光
-
-  // 设置LCD显示内容
-  lcd.setCursor(0, 0); // 设置光标位置
-  lcd.print("Beam: "); // 显示光束信息
-  lcd.setCursor(0, 1); // 设置光标位置
-  lcd.print("Counter: "); // 显示计数器信息
-  lcd.setCursor(0, 2); // 设置光标位置
-  lcd.print("Interrupted: "); // 显示中断时长信息
-  lcd.setCursor(18, 2); // 设置光标位置
-  lcd.print("ms"); // 显示时间单位
+  Serial.begin(9600); // 初始化串口
 }
 
 void loop() {
@@ -37,26 +26,28 @@ void loop() {
   Serial.println("sensorState: " + String(sensorState));
   Serial.println("previousMicros: " + String(previousMicros));
   Serial.println("currentMicros: " + String(currentMicros));
-  Serial.println("InterruptedTime: " + String(interrupted_time));
+  Serial.println("InterruptedTime: " + String(InterruptedTime));
   currentMicros = millis(); // 获取当前时间
+
+  // 清除LCD显示
+  lcd.clear();
 
   // 第一行, 根据传感器状态显示信息
   if (sensorState == HIGH) {
     // 连接中
-    lcd.setCursor(6, 0); // 设置光标位置
-    lcd.print("O"); // 显示未中断信息
+    lcd.setCursor(0, 0); // 设置光标位置
+    lcd.print("Beam: Not Broken"); // 显示未中断信息
     digitalWrite(ledPin, LOW); // LED保持熄灭
     
     if (is_interrupted) {
       counter++; // 计数器加1
-      interrupted_time = currentMicros - previousMicros; // 计算中断时长
-      is_get_new_interrupted_time = true; // 设置获取新的时间
+      InterruptedTime = currentMicros - previousMicros; // 计算中断时长
     }
     is_interrupted = false; // 重置中断状态
   } else {
     // 中断
-    lcd.setCursor(6, 0); // 设置光标位置
-    lcd.print("X"); // 显示中断信息
+    lcd.setCursor(0, 0); // 设置光标位置
+    lcd.print("Beam: Broken"); // 显示中断信息
     digitalWrite(ledPin, HIGH); // LED保存点亮
     if (!is_interrupted) {
       previousMicros = currentMicros; // 保存当前时间
@@ -65,22 +56,23 @@ void loop() {
   }
 
   // 第二行, 显示计数器数值
-  lcd.setCursor(9, 1); // 设置光标位置
+  lcd.setCursor(0, 1); // 设置光标位置
+  lcd.print("Counter: "); // 显示计数器信息
   lcd.print(counter); // 显示计数器数值
 
   // 第三行, 显示中断时长
-  lcd.setCursor(13, 2); // 设置光标位置
-  if (is_get_new_interrupted_time) {
-    lcd.print("     "); // 清空中断时长数值, 5个空格
-    lcd.setCursor(13, 2); // 设置光标位置
-    is_get_new_interrupted_time = false;
-  }
-  lcd.setCursor(13, 2); // 设置光标位置
-  lcd.print(interrupted_time); // 显示中断时长数值
+  lcd.setCursor(0, 2); // 设置光标位置
+  lcd.print("Interrupted: "); // 显示中断时长信息
+  lcd.print(InterruptedTime); // 显示中断时长数值
+  lcd.print(" ms"); // 显示中断时长单位
+
+
+  // 短暂延迟，减少显示刷新频率
+  delay(100);
 }
 
 
 // unsigned long的最大值是4294967295(即2^32 - 1), 大约 70 分钟 / 50 天 (micros() / millis())
-// 假设8位无符号整数,最大值为255(二进制11111111)
-// currentMicros => 5 (二进制00000101) 减去 previousMicros -> 250(二进制11111010) = (1)00000101 - 11111010 = 00001011 = 11(十进制)
+// 假设8位无符号整数，最大值为255（二进制11111111）
+// currentMicros => 5 （二进制00000101） 减去 previousMicros -> 250（二进制11111010） = (1)00000101 - 11111010 = 00001011 = 11(十进制)
 
