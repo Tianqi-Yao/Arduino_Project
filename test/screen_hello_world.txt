@@ -1,0 +1,23 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+// 初始化 LCD，设置 I2C 地址为 0x27 或 0x3F，取决于你的设备
+// 设置列数为 20，行数为 4
+LiquidCrystal_I2C lcd(0x27, 20, 4); // 有些模块的地址可能是0x3F
+
+void setup() {
+  lcd.init();                      // 初始化 LCD
+  lcd.backlight();                 // 打开背光
+  lcd.setCursor(0, 0);             // 定位到第一行第一个字符
+  lcd.print("Hello, World!");
+  lcd.setCursor(0, 1);             // 定位到第二行第一个字符
+  lcd.print("I2C 2004A LCD");
+  lcd.setCursor(0, 2);             // 定位到第三行第一个字符
+  lcd.print("Arduino Uno");
+  lcd.setCursor(0, 3);             // 定位到第四行第一个字符
+  lcd.print("Enjoy coding!");
+}
+
+void loop() {
+  // 你可以在这里添加更多的代码来控制 LCD
+}

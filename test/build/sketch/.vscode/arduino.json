@@ -1,0 +1,7 @@
+#line 1 "C:\\Users\\tianqi\\Documents\\projects\\Arduino_Project\\test\\.vscode\\arduino.json"
+{
+    "board": "arduino:avr:uno",
+    "port": "COM4",
+    "output": "./build",
+    "sketch": "test.ino"
+}

@@ -1,0 +1,20 @@
+// 定义 LED 灯连接的针脚
+const int ledPin = 13;
+
+// 程序开始
+void setup() {
+  // 初始化针脚为输出
+  pinMode(ledPin, OUTPUT);
+}
+
+// 循环执行
+void loop() {
+  // 点亮 LED 灯
+  digitalWrite(ledPin, HIGH);
+  // 等待 2 秒
+  delay(2000);
+  // 关闭 LED 灯
+  digitalWrite(ledPin, LOW);
+  // 等待 1 秒
+  delay(1000);
+}
