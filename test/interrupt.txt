@@ -1,0 +1,23 @@
+volatile bool ledState = false; // 使用volatile关键字，因为这个变量会在ISR中修改
+
+void setup() {
+  Serial.begin(9600); // 初始化串口通信
+  pinMode(2, INPUT_PULLUP); // 设置按钮引脚为输入并启用内部上拉电阻
+  pinMode(13, OUTPUT); // 设置LED引脚为输出
+  attachInterrupt(digitalPinToInterrupt(2), toggleLED, FALLING); // 在2号引脚上降沿触发中断
+}
+
+void loop() {
+  int t1 = millis(); // 记录当前时间
+  digitalWrite(13, ledState); // 根据ledState的值控制LED
+  // Serial.println(ledState); // 打印ledState的值
+  // ledState = LOW; // 修改ledState的值
+  int t2 = millis(); // 记录当前时间
+  Serial.println(t2-t1); // 再次打印ledState的值
+  Serial.println("ledState: " + String(ledState)); // 再次打印ledState的值
+  delay(2000); // 延时1秒
+}
+
+void toggleLED() {
+  ledState = HIGH; // 修改ledState的值
+}

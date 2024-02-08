@@ -1,0 +1,87 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+
+const int sensorPin = 2;
+const int ledPin = 13;
+
+int counter = 0;
+bool waiting_receive = false;
+bool waiting_break = true; 
+unsigned long in_time = 0; 
+unsigned long out_time = 0; 
+unsigned long break_off_time = 0; 
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(sensorPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  lcd.init();
+  lcd.backlight();
+
+  // 设置LCD显示内容
+  lcd.setCursor(0, 0);
+  lcd.print("Beam: O");
+  lcd.setCursor(0, 1);
+  lcd.print("Quantity: 0");
+  lcd.setCursor(0, 2);
+  lcd.print("Break off: 0");
+  lcd.setCursor(18, 2);
+  lcd.print("ms");
+}
+
+void loop() {
+  int sensorState = digitalRead(sensorPin); // read the state of the sensor value
+  // IR detected
+  if (sensorState == HIGH) {
+    // from "not detected" to "detected", 25ms delay
+    if (waiting_receive) {
+      counter++;
+      out_time = millis(); // 获取当前时间
+      break_off_time = out_time - in_time;
+
+      digitalWrite(ledPin, LOW); // LED熄灭
+
+      // update the LCD
+      // first line
+      lcd.setCursor(6, 0);
+      lcd.print("O");
+
+      // second line
+      lcd.setCursor(10, 1);
+      lcd.print(counter);
+
+      // third line
+      lcd.setCursor(11, 2);
+      lcd.print("       "); // 7 spaces
+      lcd.setCursor(11, 2);
+      lcd.print(break_off_time);
+      
+      waiting_receive = false;
+      waiting_break = true;
+    }
+  } 
+  // IR not detected
+  else {
+    // from detected to not detected , 3ms delay
+    if (waiting_break) {
+      in_time = millis(); // 获取当前时间
+
+      digitalWrite(ledPin, HIGH); // LED点亮
+
+      // update the LCD
+      lcd.setCursor(6, 0);
+      lcd.print("X");
+      
+      waiting_break = false;
+      waiting_receive = true;
+    }
+  }
+}
+
+
+// unsigned long的最大值是4294967295(即2^32 - 1), 大约 70 分钟 / 50 天 (micros() / millis())
+// 假设8位无符号整数,最大值为255(二进制11111111)
+// out_time => 5 (二进制00000101) 减去 in_time -> 250(二进制11111010) = (1)00000101 - 11111010 = 00001011 = 11(十进制)
+

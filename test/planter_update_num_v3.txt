@@ -1,0 +1,47 @@
+const int sensorPinAnalog = A0; 
+const int sensorPinDigital = 2;
+
+volatile bool changed = false;
+volatile int count = 0; 
+volatile int valAnolog = 0;
+volatile int valDigital = 0;
+volatile int prevDigital = 0;
+
+int time = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(sensorPinDigital, INPUT_PULLUP); // 设置引脚为输入，并启用内部上拉电阻
+  pinMode(sensorPinAnalog, INPUT); // 设置传感器引脚为输入
+  attachInterrupt(digitalPinToInterrupt(2), beamBreakChanged, CHANGE); // 在引脚2上的状态变化时触发beamBreakChanged ISR
+}
+
+void loop() {
+  if (changed) {
+    // 如果检测到digitalPinToInterrupt(2)上的状态CHANGE,打印信息
+    Serial.println(String(count) + " times" + " valAnolog: " + String(valAnolog) + "(" + String(float(valAnolog)/1023*5) + "V)" + " valDigital: " + String(valDigital));
+    
+    // bean come
+    if (valDigital == 0 && prevDigital == 1) {
+      time = millis();
+    }
+
+    // bean leave
+    if (valDigital == 1 && prevDigital == 0) {
+      time = millis() - time;
+      Serial.println("time: " + String(time) + "ms");
+    }
+
+    changed = false; // 重置状态
+  }
+  // delay(2000);
+}
+
+// ISR for beam break
+void beamBreakChanged() {
+  changed = true; // 切换中断标志状态
+  valAnolog = analogRead(sensorPinAnalog);
+  prevDigital = valDigital;
+  valDigital = digitalRead(sensorPinDigital);
+  count++; // 计数器加1
+}

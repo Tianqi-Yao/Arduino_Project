@@ -34,6 +34,8 @@ void setup() {
 void loop() {
   // 读取传感器状态
   int sensorState = digitalRead(sensorPin);
+  int time = millis();
+  Serial.println("start time: " + String(time));
   Serial.println("sensorState: " + String(sensorState));
   Serial.println("previousMicros: " + String(previousMicros));
   Serial.println("currentMicros: " + String(currentMicros));
@@ -77,6 +79,9 @@ void loop() {
   }
   lcd.setCursor(13, 2); // 设置光标位置
   lcd.print(interrupted_time); // 显示中断时长数值
+  int time2 = millis();
+  Serial.println("end time: " + String(time2));
+  Serial.println("time diff: " + String(time2 - time));
 }
 
 
